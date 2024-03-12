@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_movie_app_tmdb/HomePage/HomeUiSection/Movies.dart';
+import 'package:flutter_movie_app_tmdb/HomePage/HomeUiSection/TvSeries.dart';
+import 'package:flutter_movie_app_tmdb/HomePage/HomeUiSection/Upcomming.dart';
 import 'package:flutter_movie_app_tmdb/apiLinks/apiLinks.dart';
 
 import 'package:http/http.dart' as http;
@@ -13,7 +16,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int uval = 1;
   List<Map<String, dynamic>> trendingweek = [];
 
@@ -25,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> trandingListHome(int checkerno) async {
     if (checkerno == 1) {
       var trendingDayWeekResponse = await http.get(Uri.parse(trendingWeekUrl));
-      print('week-=> $trendingDayWeekResponse');
+
       if (trendingDayWeekResponse.statusCode == 200) {
         var tempData = jsonDecode(trendingDayWeekResponse.body);
 
@@ -53,7 +56,7 @@ class _HomePageState extends State<HomePage> {
       }
     } else if (checkerno == 2) {
       var trendingDayWeekResponse = await http.get(Uri.parse(trendingDayUrl));
-      print('Day-=> $trendingDayWeekResponse');
+
       if (trendingDayWeekResponse.statusCode == 200) {
         var tempData = jsonDecode(trendingDayWeekResponse.body);
 
@@ -112,6 +115,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    TabController tabController = TabController(length: 3, vsync: this);
     return Scaffold(
       backgroundColor: Colors.black,
       body: CustomScrollView(
@@ -302,11 +306,52 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           SliverList(
-              delegate: SliverChildListDelegate([
-            const Center(
-              child: Text('Sample Text'),
-            )
-          ]))
+            delegate: SliverChildListDelegate(
+              [
+                //  searchbarfun(),
+                SizedBox(
+                    height: 45,
+                    width: MediaQuery.of(context).size.width,
+                    child: TabBar(
+                        physics: const BouncingScrollPhysics(),
+                        isScrollable: true,
+                        controller: tabController,
+                        labelPadding:
+                            const EdgeInsets.symmetric(horizontal: 40),
+                        indicator: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          color: Colors.amber.withOpacity(0.4),
+                        ),
+                        tabs: const [
+                          Tab(
+                              child: Text(
+                            'Tv Series',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          Tab(
+                              child: Text(
+                            'Movies',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          Tab(
+                            child: Text(
+                              'Upcoming',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ])),
+                SizedBox(
+                  height: 1100,
+                  width: MediaQuery.of(context).size.width,
+                  child: TabBarView(controller: tabController, children: const [
+                    TvSeries(),
+                    Movies(),
+                    Upcoming(),
+                  ]),
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );
